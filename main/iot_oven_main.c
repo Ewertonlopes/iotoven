@@ -6,21 +6,22 @@
 
 #include "driver/ledc.h"
 #include "driver/adc.h"
+#include "driver/spi_master.h"
 
 #include <esp_log.h>
 
 static const char *TAG = "example";
 
-#define LEDC_GPIO 32
+#define LEDC_GPIO 21
 static ledc_channel_config_t ledc_channel;
 
-#define SAMPLE_CNT 32
-static const adc1_channel_t adc_channel = ADC_CHANNEL_5;
+//#define SAMPLE_CNT 32
+//static const adc1_channel_t adc_channel = ADC_CHANNEL_5;
 
 void app_main(void)
 {
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(adc_channel, ADC_ATTEN_DB_11);
+    //adc1_config_width(ADC_WIDTH_BIT_12);
+    //adc1_config_channel_atten(adc_channel, ADC_ATTEN_DB_11);
 
     ledc_timer_config_t ledc_timer = 
     {
@@ -43,13 +44,13 @@ void app_main(void)
 
     while (1) 
     {
-        int adc_val = 0;
-        for (int i = 0; i < SAMPLE_CNT; ++i)
-        {
-            adc_val += adc1_get_raw(adc_channel);
-        }
-        adc_val /= SAMPLE_CNT;
-        adc_val = adc_val*2;
+        // int adc_val = 0;
+        // for (int i = 0; i < SAMPLE_CNT; ++i)
+        // {
+        //     adc_val += adc1_get_raw(adc_channel);
+        // }
+        // adc_val /= SAMPLE_CNT;
+        // adc_val = adc_val*2;
         
         ESP_LOGI(TAG, "Changing %d\r\n", adc_val);
 
