@@ -32,14 +32,17 @@ void temp_task(void * pvParams) {
   }
 }
 
+esp_err_t data_handler(httpd_req_t *req)
+{
+    char resp[40];
+    snprintf(buffer, 40 "%f", temperature);
+    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    return ESP_OK;
+}
+
+
 void app_main(void)
 {
-    init_pwm();
-
-    spi_device_handle_t spi;
-    spi = spi_init();
-    xTaskCreate(&temp_task, "temperature_task", 4096, spi, 5, NULL);
-
     //Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -48,11 +51,16 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
+    init_pwm();
+
+    spi_device_handle_t spi;
+    spi = spi_init();
+    xTaskCreate(&temp_task, "temperature_task", 4096, spi, 5, NULL);
+
     wifi_init_softap();
 
     init_webserver();
-    
+
     while (1) 
     {
         if(temperature >= 30)

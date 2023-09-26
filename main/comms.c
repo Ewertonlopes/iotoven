@@ -39,7 +39,7 @@ void wifi_init_softap(void)
             .channel = EXAMPLE_ESP_WIFI_CHANNEL,
             .password = EXAMPLE_ESP_WIFI_PASS,
             .max_connection = EXAMPLE_MAX_STA_CONN,
-#            .pmf_cfg = {
+            .pmf_cfg = {
                     .required = true,
             },
         },
@@ -55,6 +55,7 @@ void wifi_init_softap(void)
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
              EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
 }
+
 esp_err_t test_handler(httpd_req_t *req)
 {
     const char resp[] = "<h1>Hello World</h1>";
