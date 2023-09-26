@@ -1,61 +1,56 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "definitions.h"
+#include "hal.c"
 
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
+// GLOBAL VARIABLES
 
-#include "driver/ledc.h"
-#include "driver/adc.h"
-#include "driver/spi_master.h"
+float temperature = 0.0f;
 
-#include <esp_log.h>
+//TASK CREATION
 
-static const char *TAG = "example";
-
-#define LEDC_GPIO 21
-static ledc_channel_config_t ledc_channel;
-
-//#define SAMPLE_CNT 32
-//static const adc1_channel_t adc_channel = ADC_CHANNEL_5;
+void temp_task(void * pvParams) {
+  spi_device_handle_t spi = (spi_device_handle_t) pvParams;
+  uint16_t data;
+  spi_transaction_t tM = {
+    .tx_buffer = NULL,
+    .rx_buffer = &data,
+    .length = 16 /* bits */,
+    .rxlength = 16 /* bits */,
+  };
+  for (;;) {
+    spi_device_acquire_bus(spi, portMAX_DELAY);
+    spi_device_transmit(spi, &tM);
+    spi_device_release_bus(spi);
+    uint16_t res = SPI_SWAP_DATA_RX(data, 16);
+    if (res & (1 << 14))
+      ESP_LOGE(TAG, "Temperature probe is not connected\n");
+    else {
+      res >>= 3;
+      temperature = res*0.25;
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+}
 
 void app_main(void)
 {
-    //adc1_config_width(ADC_WIDTH_BIT_12);
-    //adc1_config_channel_atten(adc_channel, ADC_ATTEN_DB_11);
+    init_pwm();
 
-    ledc_timer_config_t ledc_timer = 
-    {
-        .duty_resolution = LEDC_TIMER_13_BIT,
-        .freq_hz = 500,
-        .speed_mode = LEDC_HIGH_SPEED_MODE,
-        .timer_num = LEDC_TIMER_0,
-        .clk_cfg = LEDC_AUTO_CLK,
-    };
+    spi_device_handle_t spi;
+    spi = spi_init();
+    xTaskCreate(&temp_task, "temperature_task", 4096, spi, 5, NULL);
 
-    /* Configure the peripheral according to the LED type */
-    ledc_timer_config(&ledc_timer);
-    ledc_channel.channel = LEDC_CHANNEL_0;
-    ledc_channel.duty = 0;
-    ledc_channel.gpio_num = LEDC_GPIO;
-    ledc_channel.speed_mode = LEDC_HIGH_SPEED_MODE;
-    ledc_channel.hpoint = 0;
-    ledc_channel.timer_sel = LEDC_TIMER_0;
-    ledc_channel_config(&ledc_channel);
 
     while (1) 
     {
-        // int adc_val = 0;
-        // for (int i = 0; i < SAMPLE_CNT; ++i)
-        // {
-        //     adc_val += adc1_get_raw(adc_channel);
-        // }
-        // adc_val /= SAMPLE_CNT;
-        // adc_val = adc_val*2;
+        if(temperature >= 30)
+        {
+            change_pwm(4090);
+        }
+        else
+        {
+            change_pwm(1060);
+        }
         
-        ESP_LOGI(TAG, "Changing %d\r\n", adc_val);
-
-        ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, adc_val);
-        ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
         vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 }
