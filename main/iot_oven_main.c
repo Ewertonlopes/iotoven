@@ -1,5 +1,6 @@
 #include "definitions.h"
 #include "hal.c"
+#include "comms.c"
 
 // GLOBAL VARIABLES
 
@@ -39,7 +40,19 @@ void app_main(void)
     spi = spi_init();
     xTaskCreate(&temp_task, "temperature_task", 4096, spi, 5, NULL);
 
+    //Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
 
+    ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
+    wifi_init_softap();
+
+    init_webserver();
+    
     while (1) 
     {
         if(temperature >= 30)
