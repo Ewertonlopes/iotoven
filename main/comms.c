@@ -56,9 +56,10 @@ void wifi_init_softap(void)
              EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
 }
 
-esp_err_t test_handler(httpd_req_t *req)
+esp_err_t data_handler(httpd_req_t *req)
 {
-    const char resp[] = "<h1>Hello World</h1>";
+    char resp[40];
+    snprintf(resp, 40, "%f", temperature);
     httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
     return ESP_OK;
 }
@@ -72,12 +73,12 @@ void init_webserver()
 
     esp_err_t httpd_register_uri_handler(httpd_handle_t handle, const httpd_uri_t *uri_handler);
 
-    httpd_uri_t test_uri = {
-        .uri      = "/",
-        .method   = HTTP_GET,
-        .handler  = test_handler,
-        .user_ctx = NULL
+    httpd_uri_t data_uri = {
+    .uri      = "/",
+    .method   = HTTP_GET,
+    .handler  = data_handler,
+    .user_ctx = NULL
     };
 
-    httpd_register_uri_handler(server, &test_uri);
+    httpd_register_uri_handler(server, &data_uri);
 }

@@ -2,10 +2,6 @@
 #include "hal.c"
 #include "comms.c"
 
-// GLOBAL VARIABLES
-
-float temperature = 0.0f;
-
 //TASK CREATION
 
 void temp_task(void * pvParams) {
@@ -31,15 +27,6 @@ void temp_task(void * pvParams) {
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
-
-esp_err_t data_handler(httpd_req_t *req)
-{
-    char resp[40];
-    snprintf(buffer, 40 "%f", temperature);
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    return ESP_OK;
-}
-
 
 void app_main(void)
 {

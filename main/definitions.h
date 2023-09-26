@@ -46,5 +46,8 @@ static ledc_channel_config_t ledc_channel;
 #include <esp_log.h>
 
 
+// GLOBAL VARIABLES
+
+float temperature = 0.0f;
 
 #endif
