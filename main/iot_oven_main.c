@@ -1,9 +1,12 @@
 #include "definitions.h"
 #include "hal.c"
 #include "comms.c"
+#include "pid.c"
+
+//GLOBAL VARIABLES
+
 
 //TASK CREATION
-
 void temp_task(void * pvParams) {
   spi_device_handle_t spi = (spi_device_handle_t) pvParams;
   uint16_t data;
@@ -13,7 +16,7 @@ void temp_task(void * pvParams) {
     .length = 16 /* bits */,
     .rxlength = 16 /* bits */,
   };
-  for (;;) {
+  while (1) {
     spi_device_acquire_bus(spi, portMAX_DELAY);
     spi_device_transmit(spi, &tM);
     spi_device_release_bus(spi);
@@ -24,7 +27,18 @@ void temp_task(void * pvParams) {
       res >>= 3;
       temperature = res*0.25;
     }
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(500));
+  }
+}
+
+void pid_task(void * pvParams) 
+{
+  ppid pid = pvParams;
+  pid_create(pid,&in,&out,&set,2,0.5,0.02,60,2);
+  while (1) 
+  {
+    pid_run(pid);
+    vTaskDelay(pdMS_TO_TICKS(550));
   }
 }
 
@@ -42,7 +56,10 @@ void app_main(void)
 
     spi_device_handle_t spi;
     spi = spi_init();
-    xTaskCreate(&temp_task, "temperature_task", 4096, spi, 5, NULL);
+    xTaskCreate(&temp_task, "Temperature_task", 4096, spi, 5, NULL);
+
+    upid mainpid;    
+    xTaskCreate(&pid_task, "PID_cycle", 4096, &mainpid, 2, NULL);
 
     wifi_init_softap();
 

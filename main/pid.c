@@ -15,9 +15,19 @@ struct controlpid
     float llim;
 };
 
-typedef struct controlpid* upid;
+typedef struct controlpid upid;
+typedef struct controlpid* ppid;
 
-upid pid_create(upid pid, float* in, float* out, float* setpoint, float kp, float ki, float kd,float ulim, float llim)
+void pid_tune(ppid pid, float kp, float ki, float kd)
+{
+    if(kp<0 || ki <0 || kd<0) return;
+
+    pid->kp = kp;
+    pid->ki = ki;
+    pid->kd = kd;
+}
+
+ppid pid_create(ppid pid, float* in, float* out, float* setpoint, float kp, float ki, float kd,float ulim, float llim)
 {
     pid->in = in;
     pid->out = out;
@@ -31,23 +41,16 @@ upid pid_create(upid pid, float* in, float* out, float* setpoint, float kp, floa
     return pid;
 }
 
-void pid_tune(upid pid, float kp, float ki, float kd)
-{
-    if(kp<0 || ki <0 || kd<0) return;
 
-    pid->kp = kp;
-    pid->ki = ki;
-    pid->kd = kd;
-}
 
-void pid_constrain(upid pid)
+void pid_constrain(ppid pid)
 {
     if(pid->iacc > pid->ulim) pid->iacc = pid->ulim;
     if(pid->iacc < pid->llim) pid->iacc = pid->llim;
     return;
 }
 
-void pid_run(upid pid)
+void pid_run(ppid pid)
 {
     float in = *(pid->in);
     float error = (*(pid->setp) - in);
