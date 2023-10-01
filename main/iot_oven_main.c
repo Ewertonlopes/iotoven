@@ -27,18 +27,20 @@ void temp_task(void * pvParams) {
       res >>= 3;
       temperature = res*0.25;
     }
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(300));
   }
 }
 
 void pid_task(void * pvParams) 
 {
   ppid pid = pvParams;
-  pid_create(pid,&in,&out,&set,2,0.5,0.02,60,2);
+  pid_create(pid,&in,&out,&set,2,0.5,0.02,256,0);
   while (1) 
   {
+    in = temperature;
+    set = 220;
     pid_run(pid);
-    vTaskDelay(pdMS_TO_TICKS(550));
+    vTaskDelay(pdMS_TO_TICKS(350));
   }
 }
 
@@ -67,15 +69,9 @@ void app_main(void)
 
     while (1) 
     {
-        if(temperature >= 30)
-        {
-            change_pwm(4090);
-        }
-        else
-        {
-            change_pwm(1060);
-        }
-        
-        vTaskDelay(500 / portTICK_PERIOD_MS);
+      __uint16_t signal = mainpid->out * 32
+      if(signal>8192) signal = 8192;
+      change_pwm(signal);
+      vTaskDelay(pdMS_TO_TICKS(400));
     }
 }
