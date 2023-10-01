@@ -69,7 +69,7 @@ void app_main(void)
 
     while (1) 
     {
-      __uint16_t signal = mainpid->out * 32
+      __uint16_t signal = out * 32;
       if(signal>8192) signal = 8192;
       change_pwm(signal);
       vTaskDelay(pdMS_TO_TICKS(400));

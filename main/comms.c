@@ -64,6 +64,37 @@ esp_err_t data_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+static esp_err_t echo_post_receiver(httpd_req_t *req)
+{
+    char buf[100];
+    int ret, remaining = req->content_len;
+
+    while (remaining > 0) {
+        if ((ret = httpd_req_recv(req, buf,
+                        MIN(remaining, sizeof(buf)))) <= 0) {
+            if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
+                /* Retry receiving if timeout occurred */
+                continue;
+            }
+            return ESP_FAIL;
+        }
+
+        remaining -= ret;
+
+        /* Log data received */
+        ESP_LOGI(TAG, "=========== RECEIVED DATA ==========");
+        ESP_LOGI(TAG, "%.*s", ret, buf);
+        ESP_LOGI(TAG, "====================================");
+    }
+
+    // End response
+    httpd_resp_send_chunk(req, NULL, 0);
+    return ESP_OK;
+}
+
+
+
+
 void init_webserver()
 {
     esp_err_t httpd_start(httpd_handle_t *handle, const httpd_config_t *config);
@@ -80,5 +111,13 @@ void init_webserver()
     .user_ctx = NULL
     };
 
+    const httpd_uri_t receiver = {
+    .uri       = "/receiver",
+    .method    = HTTP_POST,
+    .handler   = echo_post_receiver,
+    .user_ctx  = NULL
+    };
+
+    httpd_register_uri_handler(server, &receiver);
     httpd_register_uri_handler(server, &data_uri);
 }

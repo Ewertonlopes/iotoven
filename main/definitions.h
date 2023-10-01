@@ -3,6 +3,7 @@
 
 //Base definitions
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -45,6 +46,11 @@ static ledc_channel_config_t ledc_channel;
 #include "lwip/sys.h"
 #include <esp_log.h>
 
+
+// MACROS
+
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 // GLOBAL VARIABLES
 

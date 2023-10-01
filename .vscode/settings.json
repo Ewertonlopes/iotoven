@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "sdkconfig.h": "c",
-        "definitions.h": "c"
+        "definitions.h": "c",
+        "unistd.h": "c"
     }
 }
