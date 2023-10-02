@@ -39,10 +39,19 @@ def add_data():
 def update_graph(i):
     add_data()
     plt.cla()  # Clear the previous plot
-    plt.plot(t_data, x_data, label='Data')
-    plt.xlabel('t-axis')
-    plt.ylabel('x-axis')
-    plt.legend()
+
+    # Customize the plot aesthetics
+    plt.plot(t_data, x_data, label='Temperature', color='b', linewidth=2, marker='o', markersize=5)
+    plt.xlabel('Time')
+    plt.ylabel('Temperature')
+    plt.title('Temperature Caracterization',fontsize=16)
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.legend(loc='upper left')
+    
+    # Beautify the x-axis timestamps (optional)
+    plt.gcf().autofmt_xdate()
+
+    plt.gca().set_facecolor('#f5f5f5')  # Set background color
 
 ani = FuncAnimation(plt.gcf(), update_graph, frames=None,repeat=False, interval=250)  # Update every 1 second (1000 milliseconds)
 

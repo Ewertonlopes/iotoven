@@ -13,7 +13,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()
-        i = np.random.randint(1,50)
+        i += np.random.randint(-2,5)
         response = f'{i}'
         self.wfile.write(response.encode('utf-8'))
 
