@@ -1,35 +1,50 @@
 import http.client
 import time
 import matplotlib.pyplot as plt
-import numpy as np
-from IPython import display
+import csv
+from matplotlib.animation import FuncAnimation
+from requests.exceptions import ConnectionError
 
-x = np.array([])
-t = np.array([])
-corr = 0.0
-freq = int(input('Enter Frequency of Test:'))
-tottime = freq*int(input('Enter Time of Test:'))
-periodo = 1/freq
+x_data = []
+t_data = []
 
-start_time = time.time()
+starttime = time.time()
 
-for i in range(tottime):
-    conn = http.client.HTTPConnection("192.168.4.1")
-    conn.request("GET", "/")
+conn = http.client.HTTPConnection("localhost:8000")
+endpoint = "/"
+csv_filename = "data/Graphs.csv"
 
-    r1 = conn.getresponse()
-    output = 0.0
-    
-    while chunk := r1.read(200):
-        output = float(chunk.decode())
+def add_data():
+    global conn
+    try:
+        conn.request("GET", endpoint)
+        r1 = conn.getresponse()
+        while chunk := r1.read(200):
+            output = float(chunk.decode())
+        
+        actualtime = time.time() - starttime
 
-    actualtime = time.time()
+        x_data.append(output)
+        t_data.append(actualtime)
 
-    conn.close()
-    x = np.append(x,output)
-    t = np.append(t,actualtime - start_time)
-    time.sleep(periodo)
+        with open(csv_filename, mode='a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow([actualtime, output])
 
-plt.title("Temperature Caracterization")
-plt.plot(t,x, 'o') 
+        conn.close()
+    except ConnectionRefusedError as e:
+        print(f"Connection error: {e}")     
+
+
+def update_graph(i):
+    add_data()
+    plt.cla()  # Clear the previous plot
+    plt.plot(t_data, x_data, label='Data')
+    plt.xlabel('t-axis')
+    plt.ylabel('x-axis')
+    plt.legend()
+
+ani = FuncAnimation(plt.gcf(), update_graph, frames=None,repeat=False, interval=250)  # Update every 1 second (1000 milliseconds)
+
+plt.tight_layout()
 plt.show()
