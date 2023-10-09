@@ -38,7 +38,6 @@ void pid_task(void * pvParams)
   while (1) 
   {
     in = temperature;
-    set = 220;
     pid_run(pid);
     vTaskDelay(pdMS_TO_TICKS(350));
   }

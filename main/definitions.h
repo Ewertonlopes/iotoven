@@ -57,6 +57,6 @@ static ledc_channel_config_t ledc_channel;
 float temperature = 0.0f;
 float in = 0.0f;
 float out = 0.0f;
-float set = 0.0f;
+float set = 60.0f;
 
 #endif

@@ -85,6 +85,18 @@ static esp_err_t echo_post_receiver(httpd_req_t *req)
         ESP_LOGI(TAG, "=========== RECEIVED DATA ==========");
         ESP_LOGI(TAG, "%.*s", ret, buf);
         ESP_LOGI(TAG, "====================================");
+
+        char *endptr;
+        int parsedInt = strtol(buf,&endptr,10);
+        if(endptr != buf)
+        {
+            ESP_LOGI(TAG,"Parsed Integer: %d", parsedInt);
+        }
+        else
+        {
+            ESP_LOGI(TAG,"Failed to Parse Integer");
+        }
+        set = (float)parsedInt;
     }
 
     // End response
