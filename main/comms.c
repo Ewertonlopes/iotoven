@@ -105,8 +105,6 @@ static esp_err_t echo_post_receiver(httpd_req_t *req)
 }
 
 
-
-
 void init_webserver()
 {
     esp_err_t httpd_start(httpd_handle_t *handle, const httpd_config_t *config);
