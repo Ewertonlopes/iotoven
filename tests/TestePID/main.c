@@ -1,5 +1,6 @@
 #include<time.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "pid.c"
 
@@ -10,28 +11,28 @@ void delay(unsigned int milliseconds){
     while((clock() - start) * 1000 / CLOCKS_PER_SEC < milliseconds);
 }
 
-float in,out,set = 100;
+float in,out,set,amb = 0.0f;
 upid mainpid;
 
 int main()
 {
-    // upid mainpid = (upid)malloc(sizeof(upid));
-    // float* in = (float*)malloc(sizeof(float));
-    // float* out = (float*)malloc(sizeof(float));
-    // float* set = (float*)malloc(sizeof(float));
+    srand(time(NULL));
+    pid_create(&mainpid,&in,&out,&set,6,0.02,0,280,0);
 
-    pid_create(&mainpid,&in,&out,&set,2,0.5,0.02,280,2);
-
-    in = 1.0f;
+    amb = 25.0f;
+    float pld[10] = {};
+    int pldi = 0;
     out = 0.0f;
-    set = 20.0f;
-
+    set = 50.0f;
     
     while(1)
     {
         pid_run(&mainpid);
-        in += 0.05*out-0.05*in;
-        printf("IN: %f\nOUT: %f\nSETPOINT: %f\n", in,out,set);
+        pld[pldi++] = out;
+        in = amb + (((float)rand() / RAND_MAX) - 0.5);
+        amb += 0.008*pld[9]-0.001f*(in-25.0f);
+        if(pldi > 9) pldi = 0;        
+        printf("IN: %f\nOUT: %f\nSETPOINT: %f\n\n", in,out,set);
         delay(1000);
     }
 
