@@ -17,7 +17,7 @@ upid mainpid;
 int main()
 {
     srand(time(NULL));
-    pid_create(&mainpid,&in,&out,&set,6,0.02,0,280,0);
+    pid_create(&mainpid,&in,&out,&set,6,0.02,0,512,0);
 
     amb = 25.0f;
     float pld[10] = {};
