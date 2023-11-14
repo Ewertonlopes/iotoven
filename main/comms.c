@@ -86,17 +86,7 @@ static esp_err_t echo_post_receiver(httpd_req_t *req)
         ESP_LOGI(TAG, "%.*s", ret, buf);
         ESP_LOGI(TAG, "====================================");
 
-        char *endptr;
-        int parsedInt = strtol(buf,&endptr,10);
-        if(endptr != buf)
-        {
-            ESP_LOGI(TAG,"Parsed Integer: %d", parsedInt);
-        }
-        else
-        {
-            ESP_LOGI(TAG,"Failed to Parse Integer");
-        }
-        set = (float)parsedInt;
+        int count = sscanf(buf, "s:%f,kp:%f,ki:%f,kd:%f", &set, &kp, &ki, &kd);
     }
 
     // End response

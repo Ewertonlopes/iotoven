@@ -34,7 +34,7 @@ void temp_task(void * pvParams) {
 void pid_task(void * pvParams) 
 {
   ppid pid = pvParams;
-  pid_create(pid,&in,&out,&set,2,0.5,0.02,256,0);
+  pid_create(pid,&in,&out,&set,2.0f,0.5f,0.02f,285,0);
   while (1) 
   {
     in = temperature;
@@ -68,9 +68,10 @@ void app_main(void)
 
     while (1) 
     {
+      ESP_LOGI(TAG,"\nsetpoint: %f\nKp: %f\nKi: %f\nKd: %f", set,kp,ki,kd);
       __uint16_t signal = out * 32;
       if(signal>8192) signal = 8192;
       change_pwm(signal);
-      vTaskDelay(pdMS_TO_TICKS(400));
+      vTaskDelay(pdMS_TO_TICKS(1500));
     }
 }
