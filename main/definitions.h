@@ -58,5 +58,8 @@ float temperature = 0.0f;
 float in = 0.0f;
 float out = 0.0f;
 float set = 60.0f;
+float kp = 2.0f;
+float ki = 0.5f;
+float kd = 0.02f;
 
 #endif
