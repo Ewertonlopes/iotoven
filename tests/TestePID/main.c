@@ -20,7 +20,7 @@ int main()
     // float* out = (float*)malloc(sizeof(float));
     // float* set = (float*)malloc(sizeof(float));
 
-    pid_create(&mainpid,&in,&out,&set,2,0.5,0.02,60,2);
+    pid_create(&mainpid,&in,&out,&set,2,0.5,0.02,280,2);
 
     in = 1.0f;
     out = 0.0f;
@@ -30,7 +30,7 @@ int main()
     while(1)
     {
         pid_run(&mainpid);
-        in += 0.75*out-20;
+        in += 0.05*out-0.05*in;
         printf("IN: %f\nOUT: %f\nSETPOINT: %f\n", in,out,set);
         delay(1000);
     }
