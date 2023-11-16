@@ -86,13 +86,41 @@ static esp_err_t echo_post_receiver(httpd_req_t *req)
         ESP_LOGI(TAG, "%.*s", ret, buf);
         ESP_LOGI(TAG, "====================================");
 
-        int count = sscanf(buf, "s:%f,kp:%f,ki:%f,kd:%f", &set, &kp, &ki, &kd);
+        int mod = 0;
+        int count1 = sscanf(buf, "mod:%u", &mod);
+        if(count1)
+        {
+            char* remainder = buf + 6;
+            if(mod)
+            {
+                int count2 = sscanf(remainder, "kp:%f,ki:%f,kd:%f", &kp, &ki, &kd);
+                if(count2 != 3)
+                {
+                    ESP_LOGI(TAG, "Failed to Parse Tune Data");
+                }
+                else tune = 1;
+            }
+            else
+            {
+                int count2 = sscanf(remainder, "s:%f", &set);
+                if(!count2)
+                {
+                    ESP_LOGI(TAG, "Failed to Parse Setpoint");
+                }
+            }
+        }
+        else
+        {
+            ESP_LOGI(TAG, "Failed to Parse Mod Type");
+        }
     }
 
     // End response
     httpd_resp_send_chunk(req, NULL, 0);
     return ESP_OK;
 }
+
+
 
 
 void init_webserver()

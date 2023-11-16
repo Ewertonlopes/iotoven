@@ -26,7 +26,6 @@
 
 //Drivers
 #include "driver/ledc.h"
-#include "driver/adc.h"
 #include "driver/spi_master.h"
 
 static const char *TAG = "iotOven";
@@ -41,6 +40,7 @@ static ledc_channel_config_t ledc_channel;
 
 #define DMA_CHAN 2
 
+#define WINDOW_SIZE 5
 //Logs
 #include "lwip/err.h"
 #include "lwip/sys.h"
@@ -52,14 +52,15 @@ static ledc_channel_config_t ledc_channel;
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MIN(x, y) (((x) < (y)) ? (x) : (y))
 
-// GLOBAL VARIABLES
+// GLOBAL VARIABLES 
 
 float temperature = 0.0f;
 float in = 0.0f;
 float out = 0.0f;
-float set = 60.0f;
-float kp = 2.0f;
+float set = 50.0f;
+float kp = 12.0f;
 float ki = 0.5f;
 float kd = 0.02f;
+int tune = 0;
 
 #endif

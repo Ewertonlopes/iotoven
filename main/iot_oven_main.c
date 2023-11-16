@@ -16,7 +16,10 @@ void temp_task(void * pvParams) {
     .length = 16 /* bits */,
     .rxlength = 16 /* bits */,
   };
-  while (1) {
+  float MMtemp[WINDOW_SIZE] = {};
+  int currentIndex = 0;
+  while (1) 
+  {
     spi_device_acquire_bus(spi, portMAX_DELAY);
     spi_device_transmit(spi, &tM);
     spi_device_release_bus(spi);
@@ -25,21 +28,32 @@ void temp_task(void * pvParams) {
       ESP_LOGE(TAG, "Temperature probe is not connected\n");
     else {
       res >>= 3;
-      temperature = res*0.25;
+      float ntemperature = res*0.25f;
+      MMtemp[currentIndex] = ntemperature;
+      currentIndex = (currentIndex + 1)%WINDOW_SIZE;
+      float movingMean = 0.0f;
+      for(int i=0;i<WINDOW_SIZE;++i)
+      {
+        movingMean+=MMtemp[i];
+      }
+      movingMean /= WINDOW_SIZE;
+      temperature = movingMean;
     }
-    vTaskDelay(pdMS_TO_TICKS(300));
+
+    vTaskDelay(pdMS_TO_TICKS(1500));
   }
 }
 
 void pid_task(void * pvParams) 
 {
   ppid pid = pvParams;
-  pid_create(pid,&in,&out,&set,2.0f,0.5f,0.02f,285,0);
+  //pid_create(pid,&in,&out,&set,1.2f,0.0005f,0.5f,285,0);
+  pid_create(pid,&in,&out,&set,30.0f,0.0f,0.0f,285,0);
   while (1) 
   {
     in = temperature;
     pid_run(pid);
-    vTaskDelay(pdMS_TO_TICKS(350));
+    vTaskDelay(pdMS_TO_TICKS(1500));
   }
 }
 
@@ -68,10 +82,18 @@ void app_main(void)
 
     while (1) 
     {
-      ESP_LOGI(TAG,"\nsetpoint: %f\nKp: %f\nKi: %f\nKd: %f", set,kp,ki,kd);
-      __uint16_t signal = out * 32;
+      //ESP_LOGI(TAG,"\nsetpoint: %f\nKp: %f\nKi: %f\nKd: %f\nTune: %d", set,kp,ki,kd,tune);
+      ///__uint16_t signal = out * 32;
+      __uint16_t signal = (__uint16_t)set;
       if(signal>8192) signal = 8192;
       change_pwm(signal);
-      vTaskDelay(pdMS_TO_TICKS(1500));
+      if(tune)
+      {
+        pid_tune(&mainpid,kp,ki,kd);
+        tune = 0;
+        ESP_LOGI(TAG,"PID TUNED");
+      }
+  
+      vTaskDelay(pdMS_TO_TICKS(160));
     }
 }
