@@ -18,7 +18,7 @@ upid mainpid;
 int main()
 {
     srand(time(NULL));
-    pid_create(&mainpid,&in,&out,&set,92.94,1.42,11.72,512,0);
+    pid_create(&mainpid,&in,&out,&set,92.94,1.42,11.72,8192,0);
 
     amb = 25.0f;
     float pld[10] = {};
@@ -32,10 +32,10 @@ int main()
         pid_run(&mainpid);
         pld[pldi++] = out;
         in = amb + (((float)rand() / RAND_MAX) - 0.5);
-        amb += (0.01196*(pld[9]/512))*temp++ - 0.001f*(in-25.0f);
+        amb += (0.01196*(pld[9]/8192))*234 - 0.001f*(in-25.0f);
         if(pldi > 9) pldi = 0;        
         printf("IN: %f\nOUT: %f\nSETPOINT: %f\n\n", in,out,set);
-        if(temp%10 == 0)
+        if((temp++)%10 == 0)
         {
             set += 1.0;
         }
