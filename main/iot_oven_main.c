@@ -40,7 +40,7 @@ void temp_task(void * pvParams) {
       temperature = movingMean;
     }
 
-    vTaskDelay(pdMS_TO_TICKS(1500));
+    vTaskDelay(pdMS_TO_TICKS(250));
   }
 }
 
@@ -48,12 +48,12 @@ void pid_task(void * pvParams)
 {
   ppid pid = pvParams;
   //pid_create(pid,&in,&out,&set,1.2f,0.0005f,0.5f,285,0);
-  pid_create(pid,&in,&out,&set,30.0f,0.0f,0.0f,285,0);
+  pid_create(pid,&in,&out,&set,30.0f,0.0f,0.0f,8192,0);
   while (1) 
   {
     in = temperature;
     pid_run(pid);
-    vTaskDelay(pdMS_TO_TICKS(1500));
+    vTaskDelay(pdMS_TO_TICKS(50));
   }
 }
 
@@ -74,7 +74,7 @@ void app_main(void)
     xTaskCreate(&temp_task, "Temperature_task", 4096, spi, 5, NULL);
 
     upid mainpid;    
-    xTaskCreate(&pid_task, "PID_cycle", 4096, &mainpid, 2, NULL);
+    xTaskCreate(&pid_task, "PID_cycle", 4096, &mainpid, 2, &pid_handle);
 
     wifi_init_softap();
 
@@ -84,7 +84,21 @@ void app_main(void)
     {
       //ESP_LOGI(TAG,"\nsetpoint: %f\nKp: %f\nKi: %f\nKd: %f\nTune: %d", set,kp,ki,kd,tune);
       ///__uint16_t signal = out * 32;
-      __uint16_t signal = (__uint16_t)set;
+      if(change)
+      {
+        if(local)
+        {
+          vTaskResume(pid_handle);
+          change = 0;
+        }
+        else
+        {
+          vTaskSuspend(pid_handle);
+          change = 0;
+        }
+      }
+
+      __uint16_t signal = (__uint16_t)out;
       if(signal>8192) signal = 8192;
       change_pwm(signal);
       if(tune)
@@ -93,7 +107,8 @@ void app_main(void)
         tune = 0;
         ESP_LOGI(TAG,"PID TUNED");
       }
+
   
-      vTaskDelay(pdMS_TO_TICKS(160));
+      vTaskDelay(pdMS_TO_TICKS(250));
     }
 }

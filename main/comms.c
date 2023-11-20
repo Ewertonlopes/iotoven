@@ -91,7 +91,24 @@ static esp_err_t echo_post_receiver(httpd_req_t *req)
         if(count1)
         {
             char* remainder = buf + 6;
-            if(mod)
+            if(mod == 3)
+            {
+                int count2 = sscanf(remainder, "loc:%u", &local);
+                if(!count2)
+                {
+                    ESP_LOGI(TAG, "Failed to Parse change Data");
+                }
+                else change = 1;
+            }
+            else if(mod == 2)
+            {
+                int count2 = sscanf(remainder, "o:%f", &out);
+                if(!count2)
+                {
+                    ESP_LOGI(TAG, "Failed to Parse Runner Data");
+                }
+            }
+            else if(mod == 1)
             {
                 int count2 = sscanf(remainder, "kp:%f,ki:%f,kd:%f", &kp, &ki, &kd);
                 if(count2 != 3)
@@ -100,7 +117,7 @@ static esp_err_t echo_post_receiver(httpd_req_t *req)
                 }
                 else tune = 1;
             }
-            else
+            else if(mod == 0)
             {
                 int count2 = sscanf(remainder, "s:%f", &set);
                 if(!count2)

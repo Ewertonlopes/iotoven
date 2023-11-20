@@ -41,6 +41,11 @@ static ledc_channel_config_t ledc_channel;
 #define DMA_CHAN 2
 
 #define WINDOW_SIZE 5
+
+#define INCLUDE_vTaskSuspend 1
+
+TaskHandle_t pid_handle;
+
 //Logs
 #include "lwip/err.h"
 #include "lwip/sys.h"
@@ -62,5 +67,7 @@ float kp = 12.0f;
 float ki = 0.5f;
 float kd = 0.02f;
 int tune = 0;
+int local = 1;
+int change = 0;
 
 #endif
