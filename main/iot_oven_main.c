@@ -101,6 +101,7 @@ void app_main(void)
       __uint16_t signal = (__uint16_t)out;
       if(signal>8192) signal = 8192;
       change_pwm(signal);
+
       if(tune)
       {
         pid_tune(&mainpid,kp,ki,kd);
