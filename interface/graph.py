@@ -9,6 +9,7 @@ import http.client
 import csv
 import datetime
 import tkinter.filedialog as filedialog
+import numpy as np
 
 class LiveGraphApp:
     def __init__(self, root):
@@ -23,11 +24,16 @@ class LiveGraphApp:
         self.frame_graph.pack(side=tk.LEFT, padx=10)
 
         self.loc = 1
+        self.scurve = 0
+        self.h = 0
+        self.lasttime = 0
 
         self.curvetime = []
         self.curvedata = []
 
         self.fig, self.ax = plt.subplots()
+        self.ax.set_xticks(np.arange(0, 600, 60))
+        self.ax.set_yticks(np.arange(0, 350, 20))
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame_graph)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
@@ -35,11 +41,14 @@ class LiveGraphApp:
         self.t_values = []
         self.max_data_points = 3500
 
-        self.start_button = ttk.Button(self.frame_graph, text="Get Data", command=self.start_update)
-        self.start_button.pack(side=tk.BOTTOM)
+        self.stop_button = ttk.Button(self.frame_graph, text="Send Curve", command=self.send_curve)
+        self.stop_button.pack(side=tk.LEFT)
 
         self.stop_button = ttk.Button(self.frame_graph, text="Stop Data", command=self.stop_update)
         self.stop_button.pack(side=tk.BOTTOM)
+
+        self.start_button = ttk.Button(self.frame_graph, text="Get Data", command=self.start_update)
+        self.start_button.pack(side=tk.BOTTOM)
 
         # Create and pack the PID control frame
         self.frame_pid = ttk.Frame(self.root)
@@ -78,8 +87,6 @@ class LiveGraphApp:
 
         self.label_cs = ttk.Label(self.frame_pid, text="Enter control signal:")
         self.entry_cs = ttk.Entry(self.frame_pid)
-
-        self.starttime = time.time()
 
         # Initial state: Mode 0 (visible), Mode 1 (hidden)
         self.label_kp.pack_forget()
@@ -158,6 +165,13 @@ class LiveGraphApp:
         self.file_button = ttk.Button(self.frame_file, text="Curve", command=self.select_file)
         self.file_button.pack(side=tk.RIGHT)
 
+    def send_curve(self):
+        self.scurve = 1
+        self.update_running = True
+        self.h = 0
+        self.lasttime = 0
+        self.start_update()
+
     def select_file(self):
         file_path = filedialog.askopenfilename(title="Select a CSV file", filetypes=[("CSV files", "*.csv")])
         if file_path:
@@ -170,8 +184,8 @@ class LiveGraphApp:
 
                 for row in csv_reader:
 
-                    time = row[0]
-                    temperature = row[1]
+                    time = round(float(row[0]),2)
+                    temperature = round(float(row[1]),2)
 
                     self.curvetime.append(time)
                     self.curvedata.append(temperature)
@@ -181,6 +195,7 @@ class LiveGraphApp:
                 self.ax.set_title("Temperature")
                 self.ax.set_xlabel("Tempo(s)")
                 self.ax.set_ylabel("Temperatura(ºC)")
+
                 self.canvas.draw()
 
     def send_request(self):
@@ -211,6 +226,7 @@ class LiveGraphApp:
 
         conn.request("POST", endpoint, postmes)
         response = conn.getresponse()
+        conn.close()
 
         self.result_label_pid.config(text=response.read().decode())
 
@@ -248,6 +264,9 @@ class LiveGraphApp:
 
     def start_update(self):
         self.update_running = True
+        self.starttime = time.time()
+        self.t_values = []
+        self.data_points = []
 
         current_time = datetime.datetime.now()
         formatted_time = current_time.strftime("%d-%m-%Y_%H-%M-%S")
@@ -269,6 +288,25 @@ class LiveGraphApp:
     def update_data(self):
         if self.update_running:
             self.add_data()
+            if self.scurve:
+                if(float(self.curvetime[self.h]) > self.lasttime):
+                    ESPADDRESS = self.entry_ip.get()
+        
+                    data = self.curvedata[self.h]
+                    conn = http.client.HTTPConnection(ESPADDRESS)
+                    endpoint = "/receiver"
+                    s = data
+                    postmes = "mod:0,s:" + s
+                    conn.request("POST", endpoint, postmes)
+                    response = conn.getresponse()
+
+                    self.result_label_pid.config(text=response.read().decode())
+                    conn.close()
+                    self.lasttime = self.curvetime[self.h]
+                    self.h +=1
+                    if self.h == len(self.curvedata):
+                        self.scurve = 0
+                        self.update_running = False
 
             if len(self.data_points) > self.max_data_points:
                 self.data_points.pop(0)
@@ -280,6 +318,8 @@ class LiveGraphApp:
             self.ax.set_title("Temperature")
             self.ax.set_xlabel("Tempo(s)")
             self.ax.set_ylabel("Temperatura(ºC)")
+            # Set the interval for ticks on the x and y axes
+
             self.canvas.draw()
 
             self.root.after(int(self.update_interval * 1000), self.update_data)
