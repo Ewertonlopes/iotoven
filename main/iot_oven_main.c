@@ -21,8 +21,6 @@ void temp_task(void * pvParams)
     .rxlength = 16 /* bits */,
   };
 
-  float MMtemp[WINDOW_SIZE] = {};
-  int currentIndex = 0;
   xLastWakeTime = xTaskGetTickCount ();
 
   while (1) 
@@ -35,16 +33,7 @@ void temp_task(void * pvParams)
       ESP_LOGE(TAG, "Temperature probe is not connected\n");
     else {
       res >>= 3;
-      float ntemperature = res*0.25f;
-      MMtemp[currentIndex] = ntemperature;
-      currentIndex = (currentIndex + 1)%WINDOW_SIZE;
-      float movingMean = 0.0f;
-      for(int i=0;i<WINDOW_SIZE;++i)
-      {
-        movingMean+=MMtemp[i];
-      }
-      movingMean /= WINDOW_SIZE;
-      temperature = movingMean;
+      temperature = res*0.25f;
     }
 
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
