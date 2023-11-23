@@ -21,7 +21,7 @@ void temp_task(void * pvParams)
     .rxlength = 16 /* bits */,
   };
 
-  xLastWakeTime = xTaskGetTickCount ();
+  xLastWakeTime = xTaskGetTickCount();
 
   while (1) 
   {
@@ -34,6 +34,7 @@ void temp_task(void * pvParams)
     else {
       res >>= 3;
       temperature = res*0.25f;
+      in = (temperature/360.0f) * 100.0f;
     }
 
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -46,14 +47,14 @@ void pid_task(void * pvParams)
 
   TickType_t xLastWakeTime;
   const TickType_t xFrequency = pdMS_TO_TICKS(250);
-  xLastWakeTime = xTaskGetTickCount ();
-
-  pid_create(pid,&in,&out,&set,30.0f,0.0f,0.0f,8192,0);
+  xLastWakeTime = xTaskGetTickCount();
+  __uint16_t pwm = 0;
+  pid_create(pid,&in,&out,&set,30.0f,0.0f,0.0f,100,0);
   while (1) 
   {
-    change_pwm((__uint16_t)out);
-    in = temperature;
+    change_pwm(pwm);
     pid_run(pid);
+    pwm = (__uint16_t)(out * 81.92f);
     vTaskDelayUntil(&xLastWakeTime, xFrequency);
   }
 }
