@@ -1,7 +1,7 @@
 #include "definitions.h"
 #include "hal.c"
 #include "comms.c"
-#include "pid.c"
+#include "dpid.c"
 
 //GLOBAL VARIABLES
 
@@ -51,7 +51,7 @@ void pid_task(void * pvParams)
   __uint16_t pwm = 0;
   //ZN - Kp 7.7289774 - Ki 2.3397828 - Kp 6.3827603
   //CC - Kp 8.8938832 - Ki 2.2633317 - Kp 5.3070582
-  pid_create(pid,&in,&out,&set,7.729f,2.340f,6.383f,100,0); 
+  pid_create(pid,&in,&out,&set,7.729f,2.340f,6.383f,100,0,0.250); 
   while (1) 
   {
     change_pwm(pwm);

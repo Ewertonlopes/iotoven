@@ -27,12 +27,6 @@ struct controlpid
 typedef struct controlpid upid;
 typedef struct controlpid* ppid;
 
-void pid_stime(ppid pid, float sample_time)
-{
-    pid->Ts = sample_time;
-    pid_tune(pid,pid->__kp,pid->__ki,pid->__kd);
-}
-
 void pid_tune(ppid pid, float kp, float ki, float kd)
 {
     if(kp<0 || ki <0 || kd<0) return;
@@ -50,6 +44,13 @@ void pid_tune(ppid pid, float kp, float ki, float kd)
     pid->__kd = kd;
 }
 
+void pid_stime(ppid pid, float sample_time)
+{
+    pid->Ts = sample_time;
+    pid_tune(pid,pid->__kp,pid->__ki,pid->__kd);
+}
+
+
 ppid pid_create(ppid pid, float* in, float* out, float* setpoint, float kp, float ki, float kd,float ulim, float llim,float sTime)
 {
     pid->in = in;
@@ -65,6 +66,7 @@ ppid pid_create(ppid pid, float* in, float* out, float* setpoint, float kp, floa
     memset(pid->state,0,4u*sizeof(float));
     return pid;
 }
+
 
 void pid_run(ppid pid)
 {
