@@ -7,7 +7,11 @@
 
 
 //TASK CREATION
-void temp_task(void * pvParams) {
+void temp_task(void * pvParams) 
+{
+  TickType_t xLastWakeTime;
+  const TickType_t xFrequency = pdMS_TO_TICKS(250);
+
   spi_device_handle_t spi = (spi_device_handle_t) pvParams;
   uint16_t data;
   spi_transaction_t tM = {
@@ -16,8 +20,11 @@ void temp_task(void * pvParams) {
     .length = 16 /* bits */,
     .rxlength = 16 /* bits */,
   };
+
   float MMtemp[WINDOW_SIZE] = {};
   int currentIndex = 0;
+  xLastWakeTime = xTaskGetTickCount ();
+
   while (1) 
   {
     spi_device_acquire_bus(spi, portMAX_DELAY);
@@ -40,20 +47,25 @@ void temp_task(void * pvParams) {
       temperature = movingMean;
     }
 
-    vTaskDelay(pdMS_TO_TICKS(250));
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
   }
 }
 
 void pid_task(void * pvParams) 
 {
   ppid pid = pvParams;
-  //pid_create(pid,&in,&out,&set,1.2f,0.0005f,0.5f,285,0);
+
+  TickType_t xLastWakeTime;
+  const TickType_t xFrequency = pdMS_TO_TICKS(250);
+  xLastWakeTime = xTaskGetTickCount ();
+
   pid_create(pid,&in,&out,&set,30.0f,0.0f,0.0f,8192,0);
   while (1) 
   {
+    change_pwm((__uint16_t)out);
     in = temperature;
     pid_run(pid);
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelayUntil(&xLastWakeTime, xFrequency);
   }
 }
 
@@ -82,8 +94,6 @@ void app_main(void)
 
     while (1) 
     {
-      //ESP_LOGI(TAG,"\nsetpoint: %f\nKp: %f\nKi: %f\nKd: %f\nTune: %d", set,kp,ki,kd,tune);
-      ///__uint16_t signal = out * 32;
       if(change)
       {
         if(local)
@@ -97,10 +107,6 @@ void app_main(void)
           change = 0;
         }
       }
-
-      __uint16_t signal = (__uint16_t)out;
-      if(signal>8192) signal = 8192;
-      change_pwm(signal);
 
       if(tune)
       {
