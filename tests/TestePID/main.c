@@ -26,14 +26,17 @@ int main()
     out = 0.0f;
     set = 30.0f;
     temp = 0;
-    float current = 1000.0f;
+    float current = 4000/8192.0f;
     
     while(1)
     {
+        float rc = 627;
+        float c = 722.38f*current/(0.69f*current + 0.1325f);
+
         // pid_run(&mainpid);
         // pld[pldi++] = out;
         // in = amb + (((float)rand() / RAND_MAX) - 0.5);
-        amb += ((1/61.829)*((((current/8192.0f)*220.0f)*((current/8192.0f)*220.0f))/67.0f)) - (amb-25.0f)/(10.1258*61.839);
+        amb += (1.0f/c)*(((current*220.0f)*(current*220.0f)/67.0f)) - (amb-25.0f)/(10.1258*61.839);
         // if(pldi > 9) pldi = 0;        
         printf("Amb: %f\n",amb);
         //printf("IN: %f\nOUT: %f\nSETPOINT: %f\n\n", in,out,set);
