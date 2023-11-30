@@ -11,7 +11,11 @@ def plot_interpolation(csv_file):
     time = df['time'] - i_time
     temperature = df['temperature']
     time_s = len(time)
-    #T[i+20] = T[i] + a*P[i] - b*T[i]
+    #T[i+1] = T[i] + f(P) + f(T)
+    #f(T) = -0.001458*T[i] + 0.05183
+    #T[i+1] = T[i] + f(P,T)
+    #f(P,T) = aP - 0.001458*T[i] + 0.05183
+    #(f(P,T) + 0.001458*T[i] - 0.05183)/P = a
 
     omega = 60
     #Qf = Qf + Potencia*dt - Qo
@@ -42,7 +46,7 @@ def plot_interpolation(csv_file):
     testT = np.zeros(time_s)
     testT[0] = temperature[0]
     for i in range(time_s-1):
-        testT[i+1] = testT[i] -0.001458*testT[i] + 0.05183
+        testT[i+1] = 0.998542*testT[i] + 0.05183
 
     # Plotting
     plt.plot(time,temperature,'o',label='Original Data')
