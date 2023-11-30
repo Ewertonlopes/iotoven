@@ -12,25 +12,21 @@ def plot_interpolation(csv_file):
     t_size = len(time)
     #T[i+20] = T[i] + a*P[i] - b*T[i]
 
-    omega = 60
+    omega = 1
     beta = 0
     betas = np.zeros(t_size-omega)
     for i in range(t_size - omega):
         betas[i] = temperature[i+omega] - temperature[i]
     beta = np.mean(betas)
-    print(beta)
+    
     testT = np.zeros(t_size)
     temp_interesse = np.zeros(t_size)
 
     for i in range(t_size-omega):
-        testT[i+omega] = temperature[i]*(beta)
+        testT[i+omega] = temperature[i] - temperature[i]*(beta)
         temp_interesse[i] = temperature[i]
 
-    mmk = 0
-    for i in range(omega,t_size - 2*omega):
-        mmk += (temp_interesse[i] - testT[i])**2
 
-    print(mmk)
     #print(beta) # beta = 0.036791372
     plt.plot(time, temp_interesse, label=f'Data Colected',color = 'green')
     plt.plot(time, testT, label=f'Previsão',color = 'red')
