@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.misc import derivative
 
+
 def plot_interpolation(csv_file):
     # Read the CSV file into a DataFrame
     df = pd.read_csv(csv_file)
@@ -42,6 +43,7 @@ def plot_interpolation(csv_file):
     fit_temps = np.linspace(min(temps), max(temps), 100)
     fit_decays = fit_function2(fit_temps)
     print(fit_function2)
+    print(fit_decays)
 
     testT = np.zeros(time_s)
     testT[0] = temperature[0]
@@ -49,9 +51,9 @@ def plot_interpolation(csv_file):
         testT[i+1] = 0.998542*testT[i] + 0.05183
 
     # Plotting
-    plt.plot(time,temperature,'o',label='Original Data')
-    plt.plot(time, testT, 'o', label='Constructed Data')
-    #plt.plot(fit_temps, fit_decays, label='Fitted Curve')
+    #plt.plot(time,temperature,'o',label='Original Data')
+    #plt.plot(time, testT, 'o', label='Constructed Data')
+    plt.plot(fit_temps, fit_decays, label='Fitted Curve')
     plt.xlabel('Time')
     plt.ylabel('Temperature')
     plt.legend()
