@@ -70,8 +70,6 @@ def plot_interpolation(csv_file):
                 error = (temperature[i] - testT[i])
             else:
                 error = 0
-            print(window_temp)
-            print(window_time)
             acce += omega*error
             window_temp[actual] = temperature[i]
             window_time[actual] = delay
@@ -80,7 +78,6 @@ def plot_interpolation(csv_file):
                 warnings.simplefilter("ignore", category=np.RankWarning)
                 coefficients = np.polyfit(window_time, window_temp, 1)
             fit_function = np.poly1d(coefficients)
-            print(fit_function)
             testT[i+delay] = fit_function(delay) + acce
 
         mmq = np.sum(np.sqrt((temperature[200:] - testT[200:])**2))
@@ -124,3 +121,13 @@ if __name__ == "__main__":
     # Replace 'your_file.csv' with the actual file path
     csv_file_path = 'Data/FullCarac.csv'
     plot_interpolation(csv_file_path)
+
+"""
+import timeit
+code_to_measure = """
+"""
+
+execution_time = timeit.timeit(code_to_measure, number=100000)
+
+print(f"Time taken: {execution_time} seconds")
+"""
