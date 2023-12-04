@@ -40,10 +40,9 @@ def plot_interpolation(csv_file):
     coefficients2 = np.polyfit(temps, decays, 1)
     fit_function2 = np.poly1d(coefficients2)
     # Generate points for the fitted curve
-    fit_temps = np.linspace(min(temps), max(temps), 100)
+    fit_temps = np.linspace(min(temps), max(temps), 20)
     fit_decays = fit_function2(fit_temps)
-    print(fit_function2)
-    print(fit_decays)
+    print(1/fit_function2[1])
 
     testT = np.zeros(time_s)
     testT[0] = temperature[0]

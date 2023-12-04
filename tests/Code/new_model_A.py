@@ -22,6 +22,13 @@ def plot_interpolation(csv_file):
 
     #a = (T[i] - 0.998542*T[i-1] - 0.05183)/167.4
 
+    #CO' = E - (1/R)(O - 25)
+    #COs = E - (1/R)(O - 25)
+    #O(Cs + 1/R) = E - 25/R
+    #O/E = (1 - 25/ER)/(Cs + 1/R)
+
+    #G = 1/(685s + 1)
+
     tension = 110
     potency = 0.013835*tension**2
     decays = np.array([])
@@ -63,7 +70,7 @@ def plot_interpolation(csv_file):
         actual = 0
         testT[0:delay] = temperature[0:delay]
         window_temp = temperature[0:delay]
-        window_time = time[0:delay]
+        window_time[0:60] = delay
         acce = 0
         for i in range(delay,time_s-delay):
             if i>120: 
@@ -72,12 +79,12 @@ def plot_interpolation(csv_file):
                 error = 0
             acce += omega*error
             window_temp[actual] = temperature[i]
-            window_time[actual] = delay
             actual = (actual + 1)%delay
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=np.RankWarning)
                 coefficients = np.polyfit(window_time, window_temp, 1)
             fit_function = np.poly1d(coefficients)
+            print(fit_function)
             testT[i+delay] = fit_function(delay) + acce
 
         mmq = np.sum(np.sqrt((temperature[200:] - testT[200:])**2))
