@@ -50,12 +50,25 @@ def plot_interpolation(csv_file):
         testT[i+1] = 0.998542*testT[i] + 0.05183
 
     # Plotting
-    #plt.plot(time,temperature,'o',label='Original Data')
+    plt.plot(time,temperature,'o',label='Data Capturada')
     #plt.plot(time, testT, 'o', label='Constructed Data')
-    plt.plot(fit_temps, fit_decays, label='Fitted Curve')
-    plt.xlabel('Time')
-    plt.ylabel('Temperature')
-    plt.legend()
+    # plt.scatter(temps,decays)
+    # plt.plot(fit_temps, fit_decays, linestyle='-', color='b', label='Temperatura x Variação')
+
+    # Adding grid lines for better readability
+    plt.grid(True, linestyle='--', alpha=0.7)
+
+    # Adding title to the plot
+    plt.title('Resfriamento do Forno')
+
+    # Adding labels to the axes with a larger font size
+    plt.xlabel('Tempo(s)', fontsize=12)
+    plt.ylabel('Temperatura (ºC)', fontsize=12)
+
+    # Adding legend with a shadow for better visibility
+    plt.legend(shadow=True)
+
+    # Display the plot
     plt.show()
 
 
