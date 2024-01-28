@@ -12,10 +12,12 @@ A low cost embedded device to do SMD soldering
 
 ## Control Theory
 
-Using a digital PID controller. 
+Using an embedded digital PID controller or using the controler in fog computing. 
 
 ## How to Use 
 
 Just run the system as is in a esp32 and connect via STA.
 
 ## Version Control
+
+v0.1
